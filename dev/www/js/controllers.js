@@ -98,12 +98,11 @@ angular.module('fastpass.controllers', ['ionic', 'firebase'])
 
 .controller('detailController', function($scope, $firebase) {
 
-
 })
 
 .controller('connectionController', function($scope, $firebase, $rootScope, $ionicModal, authService, listService) {
   // verify that user is logged in
-  // authService.checkSession();      
+  authService.checkSession();
 
   // handle messages to/from users
   $scope.comment = {
@@ -150,6 +149,7 @@ angular.module('fastpass.controllers', ['ionic', 'firebase'])
   var longitude = 0;
   var nextCircles = false;
 
+  var first = true;
   var onLocationFound = function (e) {
     console.log('latitude: ', e.latitude);
     console.log('longitude: ', e.longitude);
@@ -170,11 +170,17 @@ angular.module('fastpass.controllers', ['ionic', 'firebase'])
     // console.log(distance);
     // create a circle for display
     // todo: make circle refresh when location changes
-    var circle;
-    // if (!nextCircles) {
+    // if (!nextCircles) {  
       var radius = e.accuracy / 2;
-      circle = L.circle(e.latlng, radius);
-      circle.addTo(map);
+      if (first){
+        me = L.circleMarker(e.latlng, radius);
+        map.addLayer(me);
+        first = false;
+      } else{
+        map.removeLayer(me);
+        me = L.circleMarker(e.latlng, radius);
+        map.addLayer(me);
+      } 
       // nextCircles = true;
     // } else {
       // circle.update();
@@ -215,7 +221,10 @@ angular.module('fastpass.controllers', ['ionic', 'firebase'])
 
 })
 
-.controller('chatController', function($scope, $rootScope, $timeout, $firebase, listService) {
+.controller('chatController', function($scope, $rootScope, $timeout, $firebase, listService, authService) {
+  // verify that user is logged in
+  authService.checkSession();
+
   // initialize object for message contents
   $scope.comment = {};
   // the name asociated of the selected offer
